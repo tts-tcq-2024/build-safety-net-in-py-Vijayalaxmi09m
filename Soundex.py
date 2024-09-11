@@ -1,49 +1,47 @@
 def get_soundex_code(c):
     """Returns the Soundex digit for the given character."""
-    c = c.upper()
-    mapping = {
+    return {
         'B': '1', 'F': '1', 'P': '1', 'V': '1',
         'C': '2', 'G': '2', 'J': '2', 'K': '2', 'Q': '2', 'S': '2', 'X': '2', 'Z': '2',
         'D': '3', 'T': '3',
         'L': '4',
         'M': '5', 'N': '5',
         'R': '6'
-    }
-    return mapping.get(c, '0')  # '0' for vowels or non-mapped characters
+    }.get(c.upper(), '0')  # '0' for vowels or non-mapped characters
 
 
-def should_encode(char):
+def should_encode(c):
     """Returns True if the character should be encoded."""
-    return char.upper() not in "AEIOUYHW"  # Only consonants are encoded
+    return c.upper() not in "AEIOUYHW"  # Only consonants are encoded
 
 
-def get_filtered_codes(name):
-    """Returns a list of soundex codes for the characters, skipping unwanted characters."""
-    return [get_soundex_code(char) for char in name[1:] if should_encode(char)]
+def filter_codes(name):
+    """Filters name to return a list of codes for the valid characters."""
+    return [get_soundex_code(c) for c in name[1:] if should_encode(c)]
 
 
 def build_soundex(name):
-    """Builds the soundex code based on the first letter and filtered codes."""
+    """Builds the Soundex code based on the first letter and filtered codes."""
     if not name:
         return ""
+    
+    # Get the first letter and initialize Soundex code with it
+    soundex = [name[0].upper()]
+    
+    # Get filtered codes and track the previous code to avoid duplicates
+    codes = filter_codes(name)
+    prev_code = get_soundex_code(soundex[0])
 
-    # Start with the first letter capitalized
-    soundex = name[0].upper()
-    filtered_codes = get_filtered_codes(name)
-    
-    prev_code = get_soundex_code(soundex)
-    
-    for code in filtered_codes:
-        if code != prev_code and code != '0':  # Skip duplicates and '0' codes
-            soundex += code
+    for code in codes:
+        if code != prev_code and code != '0':  # Only add non-duplicate, valid codes
+            soundex.append(code)
             prev_code = code
         if len(soundex) == 4:  # Stop once we have a letter and three digits
             break
     
-    return soundex
+    return ''.join(soundex)
 
 
 def generate_soundex(name):
-    """Main function that generates the Soundex code for the given name."""
-    soundex = build_soundex(name)
-    return soundex.ljust(4, '0')  # Pad with zeros if less than 4 characters
+    """Generates and returns the final Soundex code."""
+    return build_soundex(name).ljust(4, '0')  # Pad with zeros if needed
