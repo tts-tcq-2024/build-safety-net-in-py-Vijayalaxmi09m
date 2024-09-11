@@ -1,5 +1,7 @@
-def get_soundex_code(c):
+def get_soundex_code(c): 
+    # Uppercase the character for uniform mapping
     c = c.upper()
+    # Define a static dictionary for character mapping
     mapping = {
         'B': '1', 'F': '1', 'P': '1', 'V': '1',
         'C': '2', 'G': '2', 'J': '2', 'K': '2', 'Q': '2', 'S': '2', 'X': '2', 'Z': '2',
@@ -8,18 +10,25 @@ def get_soundex_code(c):
         'M': '5', 'N': '5',
         'R': '6'
     }
-    return mapping.get(c, '0')  # Default to '0' for non-mapped characters
+    return mapping.get(c, '0')  # Default to '0' for vowels or unlisted characters
 
+def filter_name(name):
+    # Filters out unwanted characters (vowels, h, w, y) after the first character
+    return [char for char in name[1:].upper() if char not in "AEIOUYHW"]
 
 def generate_soundex(name):
     if not name:
         return ""
 
-    # Start with the first letter (capitalized)
+    # Retain first letter
     soundex = name[0].upper()
+
+    # Filter the name to remove unnecessary letters
+    filtered_name = filter_name(name)
     prev_code = get_soundex_code(soundex)
 
-    for char in name[1:]:
+    # Convert filtered characters to soundex code
+    for char in filtered_name:
         code = get_soundex_code(char)
         if code != '0' and code != prev_code:
             soundex += code
@@ -27,7 +36,5 @@ def generate_soundex(name):
         if len(soundex) == 4:
             break
 
-    # Pad with zeros if necessary
-    soundex = soundex.ljust(4, '0')
-
-    return soundex
+    # Pad to ensure the length is 4
+    return soundex.ljust(4, '0')
