@@ -8,28 +8,40 @@ def get_character_mapping():
         'R': '6'
     }
 
+
 def get_soundex_code(c):
-    return get_character_mapping().get(c.upper(), '0')  # '0' for vowels or non-mapped characters
+    return get_character_mapping().get(c.upper(), '0')
+
+
+def is_consonant(c):
+    return get_soundex_code(c) != '0'
+
+
+def is_valid_for_mapping(c):
+    return not should_ignore(c)
 
 
 def should_ignore(c):
     return c.upper() in "AEIOUYHW"
 
 
-def filter_and_map_name(name):
-    return [get_soundex_code(c) for c in name[1:] if not should_ignore(c)]
+def get_filtered_codes(name):
+    return [get_soundex_code(c) for c in name[1:] if is_valid_for_mapping(c)]
+
+
+def append_code_if_needed(soundex, code, prev_code):
+    if code != prev_code and code != '0':
+        soundex.append(code)
+    return soundex
 
 
 def build_soundex_from_codes(soundex, codes):
     prev_code = get_soundex_code(soundex[0])
-    
     for code in codes:
-        if code != prev_code and code != '0':  # Skip duplicates and '0' codes
-            soundex.append(code)
-            prev_code = code
-        if len(soundex) == 4:  # Stop when we have one letter and three digits
+        soundex = append_code_if_needed(soundex, code, prev_code)
+        prev_code = code
+        if len(soundex) == 4:
             break
-    
     return soundex
 
 
@@ -37,8 +49,8 @@ def generate_soundex(name):
     if not name:
         return ""
 
-    soundex = [name[0].upper()]  # Keep the first letter as is
-    codes = filter_and_map_name(name)  # Filter valid characters and convert to Soundex digits
-    soundex = build_soundex_from_codes(soundex, codes)  # Build the soundex
+    soundex = [name[0].upper()]
+    codes = get_filtered_codes(name)
+    soundex = build_soundex_from_codes(soundex, codes)
 
-    return ''.join(soundex).ljust(4, '0')  # Ensure the result has a length of 4
+    return ''.join(soundex).ljust(4, '0')
